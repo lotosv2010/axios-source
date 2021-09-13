@@ -8,7 +8,7 @@ interface IUser {
 }
 
 const getUser = async () => {
-  const params: IUser = {
+  const data: IUser = {
     name: 'test',
     password: '123456'
   }
@@ -16,14 +16,17 @@ const getUser = async () => {
   //   params
   // })
   const res: AxiosResponse<IUser> = await axios({
-    url: 'http://localhost:8080/get',
-    method: 'GET',
-    params
+    url: 'http://localhost:8080/post',
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json'
+    },
+    data
   })
   console.log(JSON.stringify(res, null, 2));
-  const {data} = res
+  const {data: user} = res
 
-  return data;
+  return user;
 }
 
 function App() {

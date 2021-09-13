@@ -11,13 +11,14 @@ export default class Axios {
   dispatchRequest<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     return new Promise<AxiosResponse<T>>((resolve, reject) => {
       const request = new XMLHttpRequest();
-      let {method, url, params} = config;
+      let {method, url, params, headers, data} = config;
       let paramsStr;
+      let body: string | null = null;
       if(params && typeof params === 'object') {
         paramsStr = qs.stringify(params);
-        url += (url.indexOf('?') !== -1 ? '&': '?') + paramsStr;
+        url += (url?.indexOf('?') !== -1 ? '&': '?') + paramsStr;
       }
-      request.open(method, url, true);
+      request.open(method!, url!, true);
       request.responseType = 'json';
       request.onreadystatechange = function() {
         if(request.readyState === 4) {
@@ -38,7 +39,15 @@ export default class Axios {
           }
         }
       }
-      request.send();
+      if(headers) {
+        for (const key in headers) {
+          request.setRequestHeader(key, headers[key]);
+        }
+      }
+      if(data) {
+        body = JSON.stringify(data);
+      }
+      request.send(body);
     })
   }
 }
