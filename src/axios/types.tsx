@@ -1,3 +1,4 @@
+import AxiosInterceptorManager from './AxiosInterceptorManager';
 export type Methods = 'get'|'GET'|'post'|'POST'|'put'|'PUT'|'delete'|'DELETE'|'options'|'OPTIONS';
 export interface AxiosRequestConfig {
   url?: string;
@@ -9,7 +10,11 @@ export interface AxiosRequestConfig {
 }
 export interface AxiosInstance {
   // Promise 的范型 T 代表此 Promise 变成成功态之后 resolve 的值 resolve(value)
-  <T = any>(config: AxiosRequestConfig): Promise<T>;
+  <T = any>(config: AxiosRequestConfig): Promise<AxiosResponse<T>>;
+  interceptors: {
+    request: AxiosInterceptorManager<AxiosRequestConfig>;
+    response:AxiosInterceptorManager<AxiosResponse>;
+  }
   create?: (config: AxiosRequestConfig) => AxiosInstance;
 }
 
