@@ -4,7 +4,8 @@ export interface AxiosRequestConfig {
   method?: Methods;
   params?: Record<string, any>,
   headers?: Record<string, any>,
-  data?: Record<string, any>
+  data?: Record<string, any>,
+  timeout?: number
 }
 export interface AxiosInstance {
   // Promise 的范型 T 代表此 Promise 变成成功态之后 resolve 的值 resolve(value)

@@ -11,7 +11,7 @@ export default class Axios {
   dispatchRequest<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     return new Promise<AxiosResponse<T>>((resolve, reject) => {
       const request = new XMLHttpRequest();
-      let {method, url, params, headers, data} = config;
+      let {method, url, params, headers, data, timeout} = config;
       let paramsStr;
       let body: string | null = null;
       if(params && typeof params === 'object') {
@@ -21,7 +21,7 @@ export default class Axios {
       request.open(method!, url!, true);
       request.responseType = 'json';
       request.onreadystatechange = function() {
-        if(request.readyState === 4) {
+        if(request.readyState === 4 && request.status !== 0) {
           if(request.status >= 200 && request.status < 300) {
             const {response, status, statusText} = request;
             const headers = parseHeaders(request.getAllResponseHeaders());
@@ -35,7 +35,8 @@ export default class Axios {
             }
             resolve(res);
           } else {
-            reject('请求失败');
+            // todo:状态码错误
+            reject(`Error: Request failed with status code ${request.status}`);
           }
         }
       }
@@ -46,6 +47,17 @@ export default class Axios {
       }
       if(data) {
         body = JSON.stringify(data);
+      }
+      // todo:网络错误
+      request.onerror = () => {
+        reject('net::ERR_INTERNET_DISCONNECTED');
+      }
+      // todo:超时错误
+      if(timeout) {
+        request.timeout = timeout;
+        request.ontimeout = () => {
+          reject('Error: timeout of 1000ms exceeded');
+        }
       }
       request.send(body);
     })

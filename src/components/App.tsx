@@ -16,7 +16,7 @@ const getUser = async () => {
   //   params
   // })
   const res: AxiosResponse<IUser> = await axios({
-    url: 'http://localhost:8080/post',
+    url: 'http://localhost:8080/post_status?code=4000',
     method: 'POST',
     headers: {
       'content-type': 'application/json'
