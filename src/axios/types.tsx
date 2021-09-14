@@ -8,7 +8,8 @@ export interface AxiosRequestConfig {
   data?: Record<string, any>,
   timeout?: number,
   transformRequest?: (data: Record<string, any>, headers: any) => any; 
-  transformResponse?: (response: Record<string, any>) => any; 
+  transformResponse?: (response: Record<string, any>) => any;
+  cancelToken?: any;
 }
 export interface AxiosInstance {
   // Promise 的范型 T 代表此 Promise 变成成功态之后 resolve 的值 resolve(value)
@@ -18,6 +19,8 @@ export interface AxiosInstance {
     response:AxiosInterceptorManager<AxiosResponse>;
   }
   create?: (config: AxiosRequestConfig) => AxiosInstance;
+  CancelToken: any;
+  isCancel: any;
 }
 
 export interface AxiosResponse <T=any> {

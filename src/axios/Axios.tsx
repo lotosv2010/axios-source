@@ -130,6 +130,13 @@ export default class Axios<T> {
           reject('Error: timeout of 1000ms exceeded');
         }
       }
+      // todo:取消请求
+      if(config.cancelToken) {
+        config.cancelToken.then((message: string) => {
+          request.abort();
+          reject(message);
+        })
+      }
       request.send(body);
     })
   }
