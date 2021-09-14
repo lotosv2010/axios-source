@@ -3,7 +3,28 @@ import qs from 'qs';
 import parseHeaders from 'parse-headers';
 import AxiosInterceptorManager, {Interceptor} from './AxiosInterceptorManager';
 
+const defaults: AxiosRequestConfig = {
+  method: 'GET',
+  timeout: 0,
+  headers: { // 请求头
+    common: { // 针对所有方法的请求生效
+      accept: 'application/json' // 指定告诉服务器返回json格式的数据
+    }
+  }
+}
+const getStyleMethods = ['get', 'head', 'delete', 'options']; // get 风格的请求
+getStyleMethods.forEach((method: string) => {
+  defaults.headers![method] = {}
+});
+const postStyleMethods = ['post', 'put', 'patch']; // post 风格的请求
+postStyleMethods.forEach((method: string) => {
+  defaults.headers![method] = {
+    'content-type': 'application/json', // 请求体的格式
+  }
+});
+const allMethods = [...getStyleMethods, ...postStyleMethods];
 export default class Axios<T> {
+  public defaults: AxiosRequestConfig = defaults;
   public interceptors = {
     request: new AxiosInterceptorManager<AxiosRequestConfig>(),
     response: new AxiosInterceptorManager<AxiosResponse<T>>()
@@ -11,6 +32,7 @@ export default class Axios<T> {
   // T 用来限制响应对象 response 里的 data 的类型
   request(config: AxiosRequestConfig): Promise<AxiosRequestConfig|AxiosResponse<T>> {
     // return this.dispatchRequest(config);
+    config.headers = Object.assign(this.defaults.headers, config.headers);
     const chain: Array<Interceptor<AxiosRequestConfig>|Interceptor<AxiosResponse<T>>> = [{
       onFulfilled: this.dispatchRequest,
       onRejected: error => error
@@ -66,7 +88,17 @@ export default class Axios<T> {
       }
       if(headers) {
         for (const key in headers) {
-          request.setRequestHeader(key, headers[key]);
+          // common 表示所有的请求方法都生效
+          // key是一个方法名
+          if(key === 'common' || allMethods.includes(key)) {
+            if(key === 'common' || key === config.method?.toLocaleLowerCase()) {
+              for (const k in headers[key]) {
+                request.setRequestHeader(k, headers[key][k]);
+              }
+            }
+          } else {
+            request.setRequestHeader(key, headers[key]);
+          }
         }
       }
       if(data) {
