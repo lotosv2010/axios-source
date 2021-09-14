@@ -9,8 +9,16 @@ const defaults: AxiosRequestConfig = {
   headers: { // 请求头
     common: { // 针对所有方法的请求生效
       accept: 'application/json' // 指定告诉服务器返回json格式的数据
-    }
-  }
+    },
+  },
+  transformRequest: (data: Record<string, any>, headers: any) => {
+    // headers['common']['content-type'] = 'application/json';
+    // return JSON.stringify(data);
+    return data
+  },
+  transformResponse: (response: Record<string, any>) => {
+    return response.data;
+  } 
 }
 const getStyleMethods = ['get', 'head', 'delete', 'options']; // get 风格的请求
 getStyleMethods.forEach((method: string) => {
@@ -33,6 +41,10 @@ export default class Axios<T> {
   request(config: AxiosRequestConfig): Promise<AxiosRequestConfig|AxiosResponse<T>> {
     // return this.dispatchRequest(config);
     config.headers = Object.assign(this.defaults.headers, config.headers);
+    config = {...this.defaults, ...config};
+    if(config.transformRequest && config.data) {
+      config.data = config.transformRequest(config.data, config.headers);
+    }
     const chain: Array<Interceptor<AxiosRequestConfig>|Interceptor<AxiosResponse<T>>> = [{
       onFulfilled: this.dispatchRequest,
       onRejected: error => error
@@ -71,13 +83,16 @@ export default class Axios<T> {
           if(request.status >= 200 && request.status < 300) {
             const {response, status, statusText} = request;
             const headers = parseHeaders(request.getAllResponseHeaders());
-            const res: AxiosResponse<T> = {
+            let res: AxiosResponse<T> = {
               data: response || request.responseText,
               status,
               statusText,
               headers,
               config,
               request
+            }
+            if(config.transformResponse) {
+              res = config.transformResponse(res);
             }
             resolve(res);
           } else {

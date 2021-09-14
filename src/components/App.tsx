@@ -27,7 +27,7 @@ const getUser = async () => {
       data
     })
     console.log(JSON.stringify(res, null, 2));
-    const {data: user} = res
+    const user = res
     return user;
   } catch (error) {
     console.error(error);
@@ -37,7 +37,7 @@ const getUser = async () => {
 function App() {
   const [user, setUser] = useState<IUser>();
   const getData = async () => {
-    const user:IUser | undefined  = await getUser();
+    const user: any = await getUser();
     console.log(user)
     setUser(user);
   }
